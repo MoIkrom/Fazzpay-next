@@ -7,7 +7,7 @@ import css from "../../styles/TransferDetail.module.css";
 
 // import components
 import Header from "../../components/Header/Header";
-import Footer from "../../components/Footer/Footer";
+import Footer from "../../components/footer/Footer";
 import Sidebar from "../../components/sidebar/Sidebar";
 
 import CardProfileTransfer from "../../components/card_profile_transfer/ProfileTransfer";
@@ -33,14 +33,11 @@ function TransferID() {
   useEffect(() => {
     const getToken = Cookies.get("token");
     axios
-      .get(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/profile/${router.query.iduser}`,
-        {
-          headers: {
-            Authorization: `Bearer ${getToken}`,
-          },
-        }
-      )
+      .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user/profile/${router.query.iduser}`, {
+        headers: {
+          Authorization: `Bearer ${getToken}`,
+        },
+      })
       .then((res) => {
         setData(res.data.data);
       })
@@ -52,8 +49,7 @@ function TransferID() {
 
   const valuePrice = (e) => {
     if (e.target.value.length === 0) setPrice("");
-    if (/[0-9]{1,12}/g.test(e.target.value[e.target.value.length - 1]))
-      setPrice(e.target.value);
+    if (/[0-9]{1,12}/g.test(e.target.value[e.target.value.length - 1])) setPrice(e.target.value);
   };
 
   const valueDesc = (e) => (setChangecolor(false), setNote(e.target.value));
@@ -78,10 +74,7 @@ function TransferID() {
           amount: price,
           notes: note,
         },
-        () => (
-          toast.success("Confirmation Payment"),
-          router.push("/transfer/confirmation")
-        ),
+        () => (toast.success("Confirmation Payment"), router.push("/transfer/confirmation")),
         () => toast.error(ErrorMessage)
       )
     );
@@ -103,41 +96,21 @@ function TransferID() {
               <CardProfileTransfer
                 key={data.id}
                 idUser={data.id}
-                images={
-                  data.image === null
-                    ? `${process.env.CLOUDINARY_LINK}`
-                    : `${process.env.CLOUD}${data.image}`
-                }
+                images={data.image === null ? `${process.env.CLOUDINARY_LINK}` : `${process.env.CLOUD}${data.image}`}
                 name={data.firstName}
-                noTelp={
-                  data.noTelp === null ? "Phone number empty" : data.number
-                }
+                noTelp={data.noTelp === null ? "Phone number empty" : data.number}
               />
 
-              <p className={css.type_amount}>
-                Type the amount you want to transfer and then press continue to
-                the next steps.
-              </p>
+              <p className={css.type_amount}>Type the amount you want to transfer and then press continue to the next steps.</p>
               {/* Input Data */}
               <div className={css.content_input_data}>
                 <div className={css.data_nominal}>
-                  <input
-                    type="tel"
-                    value={price}
-                    placeholder="0.00"
-                    onChange={valuePrice}
-                  />
+                  <input type="tel" value={price} placeholder="0.00" onChange={valuePrice} />
                 </div>
                 <div className={css.data_available}>
-                  <p>
-                    {profile.balance <= 0
-                      ? "IDR. 0"
-                      : costing(`${profile.balance}`) + ` Available`}
-                  </p>
+                  <p>{profile.balance <= 0 ? "IDR. 0" : costing(`${profile.balance}`) + ` Available`}</p>
                 </div>
-                <div
-                  className={changecolor ? css.data_note_grey : css.data_note}
-                >
+                <div className={changecolor ? css.data_note_grey : css.data_note}>
                   <i className="fa-solid fa-pencil"></i>
                   <input type="text" onChange={valueDesc} />
                 </div>
@@ -151,15 +124,7 @@ function TransferID() {
       </div>
       <Footer />
       <Drawers pages="transfer child" />
-      <ToastContainer
-        position="top-center"
-        autoClose={2000}
-        hideProgressBar={false}
-        closeOnClick={true}
-        pauseOnHover={true}
-        draggable={true}
-        theme="light"
-      />
+      <ToastContainer position="top-center" autoClose={2000} hideProgressBar={false} closeOnClick={true} pauseOnHover={true} draggable={true} theme="light" />
     </>
   );
 }
