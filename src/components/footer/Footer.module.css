@@ -1,0 +1,78 @@
+.background {
+  background: #6379F4;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.content_footer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.copyright > p {
+  font-family: 'Nunito Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 28px;
+  color: rgba(239, 239, 239, 0.9);
+}
+
+
+.data_company {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.number {
+  font-family: 'Nunito Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 28px;
+  color: #EFEFEF;
+  padding-right: 30px;
+}
+
+.number > span {
+  display: none;
+}
+.email > span {
+  display: none;
+}
+
+.email {
+  font-family: 'Nunito Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 28px;
+  color: #EFEFEF;
+}
+
+@media only screen and (max-width: 428px) {
+  .content_footer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding-top: 20px;
+  }
+  .data_company {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-top: 20px;
+  }
+  .email {
+    padding-top: 20px;
+  }
+  .number > span {
+    display: block;
+  }
+  .email > span {
+    display: block;
+  }
+}

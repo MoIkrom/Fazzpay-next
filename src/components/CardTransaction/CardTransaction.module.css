@@ -1,0 +1,39 @@
+.name {
+    font-family: 'Nunito Sans';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 22px;
+    color: #4D4B57;
+    padding-bottom: 9px;
+    padding-left: 15px;
+}
+
+.card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 96px;
+    padding: 0 30px;
+    margin: 5px auto;
+}
+
+.transfer {
+    font-family: 'Nunito Sans';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 22px;
+    text-align: right;
+    color: #1EC15F;
+}
+
+.status {
+    font-family: 'Nunito Sans';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 19px;
+    color: #7A7886;
+    padding-left: 15px;
+}

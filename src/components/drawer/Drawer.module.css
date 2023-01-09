@@ -1,0 +1,16 @@
+.floating_apps {
+    position: fixed;
+    left: -65px;
+    bottom: 50%;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: #6379F4;
+    text-align: right;
+    font-size: 1.45rem;
+    transition: all 0.3s;
+}
+
+.floating_apps:hover {
+    left: -35px;
+}
