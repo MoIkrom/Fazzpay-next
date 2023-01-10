@@ -6,7 +6,8 @@ import Footer from "../../components/Footer/Footer";
 import Sidebar from "../../components/sidebar/Sidebar";
 import CardTransaction from "../../components/CardTransaction/index";
 import styles from "../../styles/History.module.css";
-// import component 👇
+
+// import component
 import Drawers from "../../components/drawer/Drawer";
 import Cookies from "js-cookie";
 import axios from "axios";
