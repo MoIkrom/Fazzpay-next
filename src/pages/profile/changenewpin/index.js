@@ -16,6 +16,7 @@ function Changenewpin() {
   const [getpin, setGetpin] = useState("");
   const [input, setInput] = useState(true);
   const [inputpending, setInputpending] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const valuePin = (e) => (setInputpending(false), setInput(true), setGetpin(`${e}`));
   const router = useRouter();
@@ -42,6 +43,7 @@ function Changenewpin() {
   const handleChange = () => {
     const getId = Cookies.get("id");
     const getToken = Cookies.get("token");
+    setLoading(true);
     axios
       .patch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/pin/${getId}`,
@@ -61,6 +63,7 @@ function Changenewpin() {
         setTimeout(() => {
           router.replace("/profile");
         }, 2000);
+        setLoading(false);
       })
       .catch((err) => {
         toast.error(err.response.data.msg);
@@ -85,13 +88,30 @@ function Changenewpin() {
               <div className={`${css.inputContainer}`}>
                 <div className={`${css.inputPin}`}>
                   <div className={css.pin}>
-                    <ReactCodeInput type="number" fields={6} pattern="/^-?\d+\.?\d*$/" onChange={valuePin} {...props} />
+                    <ReactCodeInput type="password" fields={6} pattern="/^-?\d+\.?\d*$/" onChange={valuePin} {...props} />
                   </div>
                 </div>
               </div>
               <div className={`${css.btnContainer}`}>
                 <div className={`${css.btn}`} onClick={handleChange}>
-                  Change PIN
+                  {loading ? (
+                    <div className={`${css["lds-ring"]}`}>
+                      <div></div>
+                      <div></div>
+                      <div></div>
+                      <div></div>
+                      <div></div>
+                      <div></div>
+                      <div></div>
+                      <div></div>
+                      <div></div>
+                      <div></div>
+                      <div></div>
+                      <div></div>
+                    </div>
+                  ) : (
+                    "Change PIN"
+                  )}
                 </div>
               </div>
             </section>

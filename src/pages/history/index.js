@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 //import components
@@ -11,31 +12,48 @@ import styles from "../../styles/History.module.css";
 import Drawers from "../../components/drawer/Drawer";
 import Cookies from "js-cookie";
 import axios from "axios";
+// import { URLSearchParams } from "next/dist/compiled/@edge-runtime/primitives/url";
+
+import { useRouter, withRouter } from "next/router";
 
 function Index() {
+  const router = useRouter();
+
+  const query = router.query;
+
   const [data, setData] = useState([]);
+  const [rens, setRens] = useState();
   const [sort, setSort] = useState("");
+  const [page, setPage] = useState(1);
   const [totaldata, setTotaldata] = useState("");
+  const [totalPage, setTotalPage] = useState("");
+  const [loading, setLoading] = useState(false);
+  // const [searchParams, setSearchParams] = URLSearchParams();
 
   const sortHandler = (element) => {
     setSort(element.target.value);
   };
 
   useEffect(() => {
-    console.log(sort);
+    // console.log(data);
+    setLoading(true);
     const getToken = Cookies.get("token");
+    router.replace(`/history?page=${page === 0 ? 1 : page}&limit=5${sort}`);
     axios
-      .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/transaction/history?page=1&limit=10${sort}`, {
+      .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/transaction/history?page=${page === 0 ? 1 : page}&limit=5&sort${sort}`, {
         headers: {
           Authorization: `Bearer ${getToken}`,
         },
       })
       .then((res) => {
         setData(res.data.data);
+        setRens(res.data);
+        setTotalPage(res.data.pagination.totalPage);
         setTotaldata(res.data.pagination.totalData);
+        setLoading(false);
       })
       .catch((err) => console.log(err));
-  }, [sort]);
+  }, [sort, page, totalPage]);
 
   const rupiah = (number) => {
     if (number) {
@@ -59,14 +77,29 @@ function Index() {
                   <option selected value="">
                     -- Select Filter --
                   </option>
-                  <option value="&filter=WEEK">Weekly</option>
+                  <option value="&filter=week">Weekly</option>
                   <option value="&filter=month">Monthly</option>
-                  <option value="&filter=YEAR">Year</option>
+                  <option value="&filter=Year">Year</option>
                 </select>
               </div>
               {/* modal history */}
               <div className={styles.history__modal}>
-                {totaldata <= 0 ? (
+                {loading ? (
+                  <div className={`${styles["lds-spinner"]}`}>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                  </div>
+                ) : totaldata <= 0 ? (
                   <h1>data not found</h1>
                 ) : (
                   data.map((user) => (
@@ -80,6 +113,32 @@ function Index() {
                     />
                   ))
                 )}
+              </div>
+              <div className={`${styles.pagination}`}>
+                <button
+                  onClick={() => {
+                    setPage(page > 1 ? page - 1 : 1);
+                    // console.log(rens);
+                  }}
+                  className={page === 1 ? `${styles.buttonss}` : `${styles.buttons}`}
+                >
+                  Prev
+                </button>
+                <p>
+                  {" "}
+                  Page {page > totalPage ? totalPage : page} of {totalPage}
+                </p>
+                <button
+                  onClick={() => {
+                    // setPage(page + 1);
+                    setPage(page > totalPage ? page : page + 1);
+                    console.log(rens);
+                    // setSearchParams({ page: `${page}` });
+                  }}
+                  className={page === totalPage ? `${styles.buttonss}` : `${styles.buttons}`}
+                >
+                  Next
+                </button>
               </div>
             </section>
           </div>

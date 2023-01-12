@@ -35,6 +35,7 @@ function Login() {
   const [inputpending, setInputpending] = useState(true);
   const [input_, setInput_] = useState(true);
   const [inputpending_, setInputpending_] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   // handleToggle => Show Password
   const handleToggle = () => {
@@ -57,6 +58,7 @@ function Login() {
 
   const postLogin = () => {
     if (!email || !pass) return setInput(false), setInputpending(false), setInput_(false), setInputpending_(false), toast.error("Data cannot be empty");
+    setLoading(true);
     axios
       .post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`, { email: email, password: pass })
       .then((response) => {
@@ -68,6 +70,7 @@ function Login() {
         const getId = Cookies.get("id");
         dispatch(authActions.userThunk(getToken, getId));
         setInput(true),
+          setLoading(false),
           setInputpending(false),
           setInput_(true),
           setInputpending_(false),
@@ -77,9 +80,9 @@ function Login() {
             } else {
               return router.replace("/home");
             }
-          }, 2000);
+          }, 1000);
       })
-      .catch((err) => (setInput(false), setInputpending(false), setInput_(false), setInputpending_(false), toast.error(err.response.data.msg)));
+      .catch((err) => (setInput(false), setInputpending(false), setInput_(false), setLoading(false), setInputpending_(false), toast.error(err.response.data.msg)));
   };
 
   return (
@@ -112,13 +115,43 @@ function Login() {
                 <p>Forgot Password?</p>
               </Link>
             </div>
+            {(email && pass) === "" ? (
+              <button disabled className={` btn ${css["login-btn-off"]}`}>
+                <p className={` ${css["login-text-disabled"]}`}>Login</p>
+              </button>
+            ) : (
+              <button type="submit" className={` btn  ${css["login-btn"]}`} onClick={postLogin}>
+                {loading ? (
+                  <div className={`${css["lds-ring"]}`}>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                  </div>
+                ) : (
+                  <p className={` ${css["login-text"]}`}> Login</p>
+                )}
+              </button>
+            )}
+            {/* 
             <button className={css.login} onClick={postLogin}>
               Login
-            </button>
+            </button> */}
             <div className={css.signup}>
               <p>
                 Don`t have an account? Let`s
-                <Link href="/register"> fgregasfCSign Up</Link>
+                <Link href="/register" className={css.textsignup}>
+                  {" "}
+                  Sign Up
+                </Link>
               </p>
             </div>
           </div>
@@ -131,4 +164,3 @@ function Login() {
 }
 
 export default Login;
-f;

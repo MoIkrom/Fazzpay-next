@@ -29,6 +29,8 @@ function Changepassword() {
   const [input__, setInput__] = useState(true);
   const [inputpending__, setInputpending__] = useState(true);
 
+  const [loading, setLoading] = useState(false);
+
   // handleToggle1 => Show Password
   const handleToggle1 = () => {
     if (type === "password") {
@@ -60,27 +62,15 @@ function Changepassword() {
   };
 
   const valuePassword = (e) => {
-    setInputpending(false),
-      setInput(true),
-      setIcon("fa-solid fa-eye-slash"),
-      setType("password"),
-      setPassword(e.target.value);
+    setInputpending(false), setInput(true), setIcon("fa-solid fa-eye-slash"), setType("password"), setPassword(e.target.value);
   };
 
   const valueConfirm = (e) => {
-    setInputpending_(false),
-      setInput_(true),
-      setIcon_("fa-solid fa-eye-slash"),
-      setType_("password"),
-      setConfirm(e.target.value);
+    setInputpending_(false), setInput_(true), setIcon_("fa-solid fa-eye-slash"), setType_("password"), setConfirm(e.target.value);
   };
 
   const valueRepeat = (e) => {
-    setInputpending__(false),
-      setInput__(true),
-      setIcon__("fa-solid fa-eye-slash"),
-      setType__("password"),
-      setRepeat(e.target.value);
+    setInputpending__(false), setInput__(true), setIcon__("fa-solid fa-eye-slash"), setType__("password"), setRepeat(e.target.value);
   };
 
   const router = useRouter();
@@ -88,16 +78,8 @@ function Changepassword() {
   const id = Cookies.get("id");
   const token = Cookies.get("token");
   const clickHandler = () => {
-    if (!password || !confirm || !repeat)
-      return (
-        setInput(false),
-        setInputpending(false),
-        setInput_(false),
-        setInputpending_(false),
-        setInput__(false),
-        setInputpending__(false),
-        toast.error("Input must be field")
-      )
+    setLoading(true);
+    if (!password || !confirm || !repeat) return setInput(false), setInputpending(false), setInput_(false), setInputpending_(false), setInput__(false), setInputpending__(false), toast.error("Input must be field");
     axios
       .patch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/password/${id}`,
@@ -121,20 +103,13 @@ function Changepassword() {
           setInputpending__(false),
           setInput__(true),
           toast.success(res.data.msg),
-          setTimeout(() => { return router.replace("/profile") }, 2000)
+          setTimeout(() => {
+            return router.replace("/profile");
+          }, 2000),
+          setLoading(false)
         )
       )
-      .catch(
-        (err) => (
-          setInput(false),
-          setInputpending(false),
-          setInput_(false),
-          setInputpending_(false),
-          setInput__(false),
-          setInputpending__(false),
-          toast.error(err.response.data.msg)
-        )
-      );
+      .catch((err) => (setInput(false), setInputpending(false), setInput_(false), setInputpending_(false), setInput__(false), setInputpending__(false), toast.error(err.response.data.msg)));
   };
 
   return (
@@ -148,68 +123,45 @@ function Changepassword() {
           <div className={`col-lg-9 col-md-12 col-sm-12 ${css.content_right}`}>
             <div className="d-flex flex-column">
               <p className={css.title_password}>Change Password</p>
-              <p className={css.title_desc}>
-                You must enter your current password and then type your new
-                password twice.
-              </p>
+              <p className={css.title_desc}>You must enter your current password and then type your new password twice.</p>
               <div className={css.content_password}>
-                <div
-                  className={`${inputpending
-                    ? css.password
-                    : input
-                      ? css.password_blue
-                      : css.password_red
-                    }`}
-                >
+                <div className={`${inputpending ? css.password : input ? css.password_blue : css.password_red}`}>
                   <i className="fa-solid fa-lock"></i>
-                  <input
-                    type={type}
-                    name="newPassword"
-                    id=""
-                    onChange={valuePassword}
-                    placeholder="Current password"
-                  />
+                  <input type={type} name="newPassword" id="" onChange={valuePassword} placeholder="Current password" />
                   <i className={icon} onClick={handleToggle1}></i>
                 </div>
-                <div
-                  className={`${inputpending_
-                    ? css.password
-                    : input_
-                      ? css.password_blue
-                      : css.password_red
-                    }`}
-                >
+                <div className={`${inputpending_ ? css.password : input_ ? css.password_blue : css.password_red}`}>
                   <i className="fa-solid fa-lock"></i>
-                  <input
-                    type={type_}
-                    name="confirmPassword"
-                    id=""
-                    onChange={valueConfirm}
-                    placeholder="New password"
-                  />
+                  <input type={type_} name="confirmPassword" id="" onChange={valueConfirm} placeholder="New password" />
                   <i className={icon_} onClick={handleToggle2}></i>
                 </div>
-                <div
-                  className={`${inputpending__
-                    ? css.password
-                    : input__
-                      ? css.password_blue
-                      : css.password_red
-                    }`}
-                >
+                <div className={`${inputpending__ ? css.password : input__ ? css.password_blue : css.password_red}`}>
                   <i className="fa-solid fa-lock"></i>
-                  <input
-                    type={type__}
-                    name="repeatPassword"
-                    id=""
-                    onChange={valueRepeat}
-                    placeholder="New password"
-                  />
+                  <input type={type__} name="repeatPassword" id="" onChange={valueRepeat} placeholder="New password" />
                   <i className={icon__} onClick={handleToggle3}></i>
                 </div>
               </div>
               <div className={css.button_change_password}>
-                <button onClick={clickHandler}>Change Password</button>
+                <button onClick={clickHandler}>
+                  {loading ? (
+                    <div className={`${css["lds-ring"]}`}>
+                      <div></div>
+                      <div></div>
+                      <div></div>
+                      <div></div>
+                      <div></div>
+                      <div></div>
+                      <div></div>
+                      <div></div>
+                      <div></div>
+                      <div></div>
+                      <div></div>
+                      <div></div>
+                    </div>
+                  ) : (
+                    "Change Password "
+                  )}
+                </button>
               </div>
             </div>
           </div>
@@ -217,15 +169,7 @@ function Changepassword() {
       </div>
       <Footer />
       <Drawers pages="profile child" />
-      <ToastContainer
-        position="top-center"
-        autoClose={2000}
-        hideProgressBar={false}
-        closeOnClick={true}
-        pauseOnHover={true}
-        draggable={true}
-        theme="light"
-      />
+      <ToastContainer position="top-center" autoClose={2000} hideProgressBar={false} closeOnClick={true} pauseOnHover={true} draggable={true} theme="light" />
     </>
   );
 }

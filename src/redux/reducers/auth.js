@@ -24,8 +24,7 @@ const initialState = {
 
 const authReducer = (prevState = initialState, { type, payload }) => {
   const { Pending, Rejected, Fulfilled } = ActionType;
-  const { authLogin, authLogout, profile, transactions, submitTf , deleteTf} =
-    ACTION_STRING;
+  const { authLogin, authLogout, profile, transactions, submitTf, deleteTf } = ACTION_STRING;
 
   switch (type) {
     // login
@@ -86,7 +85,7 @@ const authReducer = (prevState = initialState, { type, payload }) => {
         isLoading: false,
         isError: true,
         isFulfilled: false,
-        error: payload.error.response.data.msg,
+        error: payload.error.response,
       };
     case profile.concat("_", Fulfilled):
       return {
@@ -140,10 +139,10 @@ const authReducer = (prevState = initialState, { type, payload }) => {
         isFulfilled: true,
         isLoading: false,
         error: null,
-      //   transactions: { receiverId: null, amount: 0, notes: null },
+        //   transactions: { receiverId: null, amount: 0, notes: null },
       };
 
-      case deleteTf.concat("_", Fulfilled):
+    case deleteTf.concat("_", Fulfilled):
       return {
         ...prevState,
         transactions: {

@@ -13,20 +13,34 @@ import CardProfileTransfer from "../../components/card_profile_transfer/ProfileT
 import Drawers from "../../components/drawer/Drawer";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { debounce } from "../../utils/debounce/debounce";
+
+import { useRouter } from "next/router";
 
 function Transfer() {
   const [data, setData] = useState([]);
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const [limit, setLimit] = useState(5);
+  const [page, setPage] = useState(1);
 
+  // const updateChange = (e) => setSearch(e.target.value);
   const searchHandler = (e) => {
     setSearch(e.target.value);
+    setPage(1);
+    if (e.target.value !== null) {
+      router.replace(`/transfer/?page=${page}&limit=${limit}&search=${e.target.value}`);
+    }
   };
+  const debounceOnChange = debounce(searchHandler, 1500);
 
   useEffect(() => {
     const getToken = Cookies.get("token");
+    setLoading(true);
     axios
       .get(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/user?page=1&limit=10&search=${search}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/user?page=1&limit=4&search=${search}`,
 
         {
           headers: {
@@ -36,6 +50,7 @@ function Transfer() {
       )
       .then((res) => {
         // console.log(res.data.data);
+        setLoading(false);
         setData(res.data.data);
       })
       .catch((err) => {
@@ -57,18 +72,43 @@ function Transfer() {
               {/* search box */}
               <div className={css.search_box}>
                 <i className="fa-sharp fa-solid fa-magnifying-glass"></i>
-                <input type="text" name="" id="" placeholder="Search receiver here" onChange={searchHandler} />
+                <input type="text" name="" id="" placeholder="Search receiver here" onChange={debounceOnChange} />
               </div>
               {/* profile */}
               <div className={css.scroll_bar}>
-                <div className={css.scroll}>
-                  {data.map(
-                    (user) => (
-                      console.log(`${process.env.CLOUDINARY_LINK}`),
-                      (<CardProfileTransfer key={user.id} idUser={user.id} images={user.image === null ? `${process.env.CLOUDINARY_LINK}` : `${process.env.CLOUD}${user.image}`} name={user.firstName} noTelp={user.noTelp} />)
-                    )
-                  )}
-                </div>
+                {loading ? (
+                  <div className={`${css["lds-spinner"]}`}>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                  </div>
+                ) : (
+                  <div className={css.scroll}>
+                    {data.map(
+                      (user) => (
+                        console.log(`${process.env.CLOUDINARY_LINK}`),
+                        (
+                          <CardProfileTransfer
+                            key={user.id}
+                            idUser={user.id}
+                            images={user.image === null ? `${process.env.CLOUDINARY_LINK}` : `${process.env.CLOUD}${user.image}`}
+                            name={user.firstName + " " + user.lastName}
+                            noTelp={user.noTelp}
+                          />
+                        )
+                      )
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>

@@ -13,6 +13,46 @@
   box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.05);
 }
 
+/* Start Loading */
+.lds-ring {
+  display: flex;
+  position: relative;
+  width: 80px;
+  height: 26px;
+  justify-content: center !important;
+  align-items: center !important;
+}
+.lds-ring div {
+  box-sizing: border-box;
+  display: block;
+  position: absolute;
+  width: 25px;
+  height: 25px;
+  margin: 8px;
+  border: 3px solid #f8f9fa;
+  border-radius: 68%;
+  animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  border-color: #f8f9fa transparent transparent transparent;
+}
+.lds-ring div:nth-child(1) {
+  animation-delay: -0.45s;
+}
+.lds-ring div:nth-child(2) {
+  animation-delay: -0.3s;
+}
+.lds-ring div:nth-child(3) {
+  animation-delay: -0.15s;
+}
+@keyframes lds-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* End Loading */
 .tittle {
   font-family: "Nunito Sans";
   font-size: 18px;
@@ -106,8 +146,8 @@
 }
 
 .btn:hover {
-    background-color: #6379F4;
-    color:white;
+  background-color: #6379f4;
+  color: white;
 }
 
 @media screen and (max-width: 768px) {

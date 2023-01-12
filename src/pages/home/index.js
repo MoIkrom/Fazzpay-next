@@ -9,6 +9,9 @@ import Footer from "../../components/Footer/Footer";
 import Sidebar from "../../components/sidebar/Sidebar";
 import CardTransaction from "../../components/CardTransaction/index";
 
+import Button from "react-bootstrap/Button";
+import Modal from "react-bootstrap/Modal";
+
 //import image
 import Image from "next/image";
 import icon_grid from "../../assets/dashboard/icon_grid.png";
@@ -37,12 +40,26 @@ function Index() {
   const dispatch = useDispatch();
   const profile = useSelector((state) => state.auth.profile);
   const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const [showmodal, setShowModal] = useState(false);
+  const [amount, setAmount] = useState("");
+  const [url, setUrl] = useState("");
+  const [tab, setTab] = useState("");
+  const handleCloseModal = () => setShowModal(false);
+  const handleShowModal = () => setShowModal(true);
 
   const seeAllHandler = () => {
     router.push("/history");
   };
   const transferHandler = () => {
     router.push("/transfer");
+  };
+
+  const inputNumber = (event) => {
+    if (!/[0-9]/.test(event.key)) {
+      event.preventDefault();
+    }
   };
 
   const [show, setShow] = useState(false);
@@ -65,45 +82,66 @@ function Index() {
 
   useEffect(() => {
     const getToken = Cookies.get("token");
+    setLoading(true);
     axios
       .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/transaction/history?page=1&limit=4&`, {
         headers: {
           Authorization: `Bearer ${getToken}`,
         },
       })
-      .then((res) => setData(res.data.data))
+      .then((res) => {
+        setData(res.data.data);
+        setLoading(false);
+      })
       .catch((err) => console.log(err));
   }, []);
 
-  // update income expense
-  const [chart, setChart] = useState([]);
+  const handleAmount = (e) => {
+    setAmount(e.target.value);
+  };
 
-  useEffect(() => {
+  const openInNewTab = (url) => {
+    const newWindow = window.open(url, "_blank", "noopener,noreferrer");
+    if (newWindow) newWindow.opener = null;
+  };
+
+  const handleSubmit = () => {
+    setLoading(true);
     const getToken = Cookies.get("token");
-    const getId = Cookies.get(`id`);
+    axios.defaults.headers.common["Authorization"] = `Bearer ${getToken}`;
     axios
-      .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/dashboard/${getId}`, {
+      .post(`https://fazzpay-rose.vercel.app/transaction/top-up`, {
+        amount,
+        url,
         headers: {
-          Authorization: `Bearer ${getToken}`,
+          Authorization: `Bearer${getToken}`,
         },
       })
-      .then((res) => setChart(res.data.data))
-      .catch((err) => console.log(err));
-  }, []);
-  // topup
-  const [price, setPrice] = useState("");
-  const [link, setLink] = useState("");
+      .then((response) => {
+        setLoading(false);
+        openInNewTab(response.data.data.redirectUrl);
+        setShowModal(false);
+        // console.log(response.data.data.redirectUrl);
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoading(false);
+      });
+  };
   const valuePrice = (e) => {
     if (e.target.value.length === 0) setPrice("");
     if (/[0-9]{1,12}/g.test(e.target.value[e.target.value.length - 1])) setPrice(e.target.value);
+    console.log(e.target.value);
   };
   const handleTopup = () => {
     const getToken = Cookies.get("token");
+    // valuePrice();
     axios
       .post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/transaction/top-up`,
         {
-          amount: price,
+          amount,
+          url,
         },
         {
           headers: {
@@ -111,14 +149,42 @@ function Index() {
           },
         }
       )
-      .then(
-        (res) => setLink(res.data.data.redirectUrl),
+      .then((res) => {
+        // setLink(res.data.data.redirectUrl),
+        setTab(res.data.data.redirectUrl);
+        window.open(tab, "_blank", "noopener,noreferrer");
+        // window.open(`https://app.sandbox.midtrans.com/snap/v3/redirection/a969594f-daff-434b-a696-c9bde9f33b08`, "_blank", "noopener,noreferrer");
         setTimeout(() => {
           setShow(false);
-        }, 7000)
-      )
+        }, 3000);
+        // router.reload(window.location.pathname);
+        // console.log(price);
+      })
       .catch((err) => console.log(err));
   };
+
+  // update income expense
+  const [chart, setChart] = useState([]);
+
+  useEffect(() => {
+    const getToken = Cookies.get("token");
+    const getId = Cookies.get(`id`);
+    setLoading(true);
+    axios
+      .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/dashboard/${getId}`, {
+        headers: {
+          Authorization: `Bearer ${getToken}`,
+        },
+      })
+      .then((res) => {
+        setChart(res.data.data);
+        setLoading(false);
+      })
+      .catch((err) => console.log(err));
+  }, []);
+  // topup
+  const [price, setPrice] = useState("");
+  const [link, setLink] = useState("");
 
   const rupiah = (number) => {
     if (number) {
@@ -137,26 +203,39 @@ function Index() {
             </section>
             <div className={`${styles["content-right"]} h-100`}>
               <div className={styles["content-one"]}>
-                <div className={styles["content-balance"]}>
-                  <p className={styles["text-balance"]}>Balance</p>
-                  <p className={styles["text-price"]}>{profile.balance ? rupiah(profile.balance) : "IDR. 0"}</p>
-                  <p className={styles["text-phone"]}>{profile.number ? profile.number : "Please manage your phone number"}</p>
-                </div>
+                {loading ? (
+                  <div className={styles["content-balance"]}>
+                    <p className={styles["text-balance"]}>Balance</p>
+                    <p className={styles["text-price"]}> </p>
+                    <p className={styles["text-phone"]}> </p>
+                  </div>
+                ) : (
+                  <div className={styles["content-balance"]}>
+                    <p className={styles["text-balance"]}>Balance</p>
+                    <p className={styles["text-price"]}>{profile.balance ? rupiah(profile.balance) : "IDR. 0"}</p>
+                    <p className={styles["text-phone"]}>{profile.number ? profile.number : "Please manage your phone number"}</p>
+                  </div>
+                )}
+
                 <div className={styles["content-tf"]}>
                   <div className={styles["border-tf"]} onClick={transferHandler}>
                     <Image src={icon_arrow_blue} alt="icon_arrow_blue" />
                     <p className={styles["text-transfer"]}>Transfer</p>
                   </div>
-                  <div className={styles["border-tf"]} onClick={handleclickshow}>
+                  <div
+                    className={styles["border-tf"]}
+                    onClick={() => {
+                      handleShowModal();
+                      console.log("uda diclick");
+                    }}
+                  >
                     <Image src={icon_arrow_blue} alt="icon_arrow_blue" />
-                    <p className={styles["text-transfer"]} onClick={() => setShow(true)}>
-                      Top Up
-                    </p>
+                    <p className={styles["text-transfer"]}>Top Up</p>
                   </div>
                 </div>
               </div>
 
-              {!show ? null : (
+              {/* {!show ? null : (
                 <section className={`${styles.box}`}>
                   <section className={styles.content_box}>
                     <span className="d-flex justify-content-between" onClick={() => setShow(false)}>
@@ -165,11 +244,18 @@ function Index() {
                         <i className="fa-solid fa-xmark fs-2"></i>
                       </div>
                     </span>
-                    <p className={styles.desc_modal}>
-                      Enter the amount of money, and click <br /> submit
-                    </p>
+                    <p className={styles.desc_modal}>Enter the amount of money, and click submit</p>
                     <span className={styles.input_}>
-                      <input type="number" className={styles.arrow} value={price} onChange={valuePrice} />
+                      <input
+                        type="number"
+                        className={styles.arrow}
+                        value={amount}
+                        onKeyPress={inputNumber}
+                        onChange={
+                          handleAmount
+                          // console.log(amount);
+                        }
+                      />
                     </span>
                     <br />
                     {link === "" ? null : (
@@ -179,12 +265,13 @@ function Index() {
                     )}
                     <span className="d-flex justify-content-end align-items-center">
                       <button className={styles.btn_submit} onClick={handleTopup}>
+                        <button className={styles.btn_submit} onClick={handleTopup}>
                         Submit
                       </button>
                     </span>
                   </section>
                 </section>
-              )}
+              )} */}
 
               <div className={styles["content-grap"]}>
                 <div className={styles["content-grap-left"]}>
@@ -254,6 +341,44 @@ function Index() {
           </div>
         </section>
       </main>
+      <Modal show={showmodal} onHide={handleCloseModal} backdrop="static" keyboard={false}>
+        <Modal.Header closeButton>
+          <Modal.Title>Topup</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className={styles["title-topUp"]}>Enter the amount of money, and click submit</Modal.Body>
+
+        <input type="text" className={`${styles["inputs"]} form-control form-control-sm validate ml-0`} onKeyPress={inputNumber} onChange={handleAmount} />
+        {loading ? (
+          <div className={styles["loadings"]}>
+            <p>Please Wait Your Payment on Process . . . </p>
+          </div>
+        ) : (
+          ""
+        )}
+
+        <Modal.Footer>
+          <Button variant="primary" className={` fw-bold text-white border-0 ${styles["submits"]} `} onClick={handleSubmit}>
+            {loading ? (
+              <div className={`${styles["lds-ring"]}`}>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+              </div>
+            ) : (
+              "submit"
+            )}
+          </Button>
+        </Modal.Footer>
+      </Modal>
       <Footer />
       <Drawers pages="home child" />
     </>

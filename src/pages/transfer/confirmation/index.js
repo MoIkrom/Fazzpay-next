@@ -34,22 +34,23 @@ function Confirmation() {
   const [lastname, setLastname] = useState("");
   const [phone, setPhone] = useState("");
 
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     const getToken = Cookies.get("token");
+    setLoading(true);
     axios
-      .get(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/profile/${transactions.receiverId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${getToken}`,
-          },
-        }
-      )
+      .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user/profile/${transactions.receiverId}`, {
+        headers: {
+          Authorization: `Bearer ${getToken}`,
+        },
+      })
       .then((res) => {
         setImage(`${process.env.CLOUD}${res.data.data.image}`);
         setFirstname(res.data.data.firstName);
         setLastname(res.data.data.lastName);
         setPhone(res.data.data.noTelp);
+        setLoading(false);
       })
       .catch((err) => {
         console.log(err);
@@ -113,20 +114,7 @@ function Confirmation() {
   };
 
   const transactionDate = () => {
-    const arrbulan = [
-      "Januari",
-      "Februari",
-      "Maret",
-      "April",
-      "Mei",
-      "Juni",
-      "Juli",
-      "Agustus",
-      "September",
-      "Oktober",
-      "November",
-      "Desember",
-    ];
+    const arrbulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
     const date = new Date();
     const millisecond = date.getMilliseconds();
     const detik = date.getSeconds();
@@ -156,40 +144,31 @@ function Confirmation() {
           <section className="col-12 col-sm-12 col-md-3 d-none d-sm-none d-lg-block ">
             <Sidebar page="transfer child" />
           </section>
-          <div
-            className={`col-lg-9 col-md-12 col-sm-12 ${styles.content_right}`}
-          >
+          <div className={`col-lg-9 col-md-12 col-sm-12 ${styles.content_right}`}>
             <p className={styles["title"]}>Transfer To</p>
-            <div className={styles["content-user"]}>
-              <div className={styles["bor-samuel"]}>
-                <Image
-                  src={
-                    image ===
-                      "https://res.cloudinary.com/dd1uwz8eu/image/upload/v1666604839/null"
-                      ? `${process.env.CLOUDINARY_LINK}`
-                      : image
-                  }
-                  alt="Image_User"
-                  width={80}
-                  height={80}
-                  className="rounded-3"
-                />
-                <div className={styles["samuel"]}>
-                  <p className={styles["text-samuel"]}>
-                    {firstname} {lastname}
-                  </p>
-                  <p className={styles["phone-samuel"]}>{phone}</p>
+
+            {loading ? (
+              ""
+            ) : (
+              <div className={styles["content-user"]}>
+                <div className={styles["bor-samuel"]}>
+                  <Image src={image === "https://res.cloudinary.com/dd1uwz8eu/image/upload/v1666604839/null" ? `${process.env.CLOUDINARY_LINK}` : image} alt="Image_User" width={80} height={80} className="rounded-3" />
+                  <div className={styles["samuel"]}>
+                    <p className={styles["text-samuel"]}>
+                      {firstname} {lastname}
+                    </p>
+                    <p className={styles["phone-samuel"]}>{phone}</p>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
+
             <p className={styles["detail"]}>Details</p>
             <div className={styles["content-user"]}>
               <div className={styles["bor-samuel"]}>
                 <div className={styles["samuel"]}>
                   <p className={styles["text-amount"]}>Amount</p>
-                  <p className={styles["price"]}>
-                    {costing(transactions.amount)}
-                  </p>
+                  <p className={styles["price"]}>{costing(transactions.amount)}</p>
                 </div>
               </div>
             </div>
@@ -221,7 +200,9 @@ function Confirmation() {
               <button
                 className={styles["button"]}
                 type="button"
-                onClick={() => setShowModal(true)}
+                onClick={() => {
+                  setShowModal(true), window.scrollTo({ top: 250, left: 100 });
+                }}
               >
                 Continue
               </button>
@@ -229,34 +210,34 @@ function Confirmation() {
                 <div className={styles["content-all"]}>
                   <div className={styles["modal"]}>
                     <div className={styles["content-text-pin"]}>
-                      <p className={styles["text-pin"]}>
-                        Enter PIN to Transfer
-                      </p>
-                      <a
-                        className={styles["text-x"]}
-                        onClick={() => setShowModal(false)}
-                      >
+                      <p className={styles["text-pin"]}>Enter PIN to Transfer</p>
+                      <a className={styles["text-x"]} onClick={() => setShowModal(false)}>
                         <i className="fa-sharp fa-solid fa-circle-xmark fs-4 text-danger"></i>
                       </a>
                     </div>
-                    <p className={styles["confirmation"]}>
-                      Enter your 6 digits PIN for confirmation to continue
-                      transferring money.
-                    </p>
+                    <p className={styles["confirmation"]}>Enter your 6 digits PIN for confirmation to continue transferring money.</p>
                     <div className={styles.pin}>
-                      <ReactCodeInput
-                        type="number"
-                        fields={6}
-                        pattern="/^-?\d+\.?\d*$/"
-                        onChange={valuePin}
-                        {...props}
-                      />
+                      <ReactCodeInput type="password" fields={6} pattern="/^-?\d+\.?\d*$/" onChange={valuePin} {...props} />
                     </div>
-                    <button
-                      className={styles["button-sec"]}
-                      onClick={valuePinHandler}
-                    >
-                      Continue
+                    <button className={styles["button-sec"]} onClick={valuePinHandler}>
+                      {loading ? (
+                        <div className={`${styles["lds-ring"]}`}>
+                          <div></div>
+                          <div></div>
+                          <div></div>
+                          <div></div>
+                          <div></div>
+                          <div></div>
+                          <div></div>
+                          <div></div>
+                          <div></div>
+                          <div></div>
+                          <div></div>
+                          <div></div>
+                        </div>
+                      ) : (
+                        "Continue"
+                      )}
                     </button>
                   </div>
                 </div>
@@ -267,15 +248,7 @@ function Confirmation() {
       </div>
       <Footer />
       <Drawers pages="transfer child" />
-      <ToastContainer
-        position="top-center"
-        autoClose={2000}
-        hideProgressBar={false}
-        closeOnClick={true}
-        pauseOnHover={true}
-        draggable={true}
-        theme="light"
-      />
+      <ToastContainer position="top-center" autoClose={2000} hideProgressBar={false} closeOnClick={true} pauseOnHover={true} draggable={true} theme="light" />
     </>
   );
 }

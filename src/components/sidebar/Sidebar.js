@@ -24,806 +24,849 @@ import Modal from "react-bootstrap/Modal";
 import axios from "axios";
 import Link from "next/link";
 function Sidebar({ page }) {
-   const router = useRouter();
-   const dispatch = useDispatch();
+  const router = useRouter();
+  const dispatch = useDispatch();
 
-   const [show, setShow] = useState(false);
-   const [showmodal, setShowmodal] = useState(false);
+  const [show, setShow] = useState(false);
+  const [showmodal, setShowmodal] = useState(false);
 
-   const handleShow = () => {
-      console.log(show), setShow(false);
-   };
+  const [loading, setLoading] = useState(false);
+  const [url, setUrl] = useState("");
+  const [amount, setAmount] = useState("");
+  const [showmodaltopup, setShowModaltopup] = useState(false);
 
-   const handleclickshow = () => {
-      console.log(show), setShow(true);
-   };
+  const inputNumber = (event) => {
+    if (!/[0-9]/.test(event.key)) {
+      event.preventDefault();
+    }
+  };
+  const handleTopup = () => {
+    const getToken = Cookies.get("token");
+    // valuePrice();
+    axios
+      .post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/transaction/top-up`,
+        {
+          amount,
+          url,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${getToken}`,
+          },
+        }
+      )
+      .then((res) => {
+        // setLink(res.data.data.redirectUrl),
+        setTab(res.data.data.redirectUrl);
+        window.open(tab, "_blank", "noopener,noreferrer");
+        // window.open(`https://app.sandbox.midtrans.com/snap/v3/redirection/a969594f-daff-434b-a696-c9bde9f33b08`, "_blank", "noopener,noreferrer");
+        setTimeout(() => {
+          setShow(false);
+        }, 3000);
+        // router.reload(window.location.pathname);
+        // console.log(price);
+      })
+      .catch((err) => console.log(err));
+  };
 
-   const homeClickHandler = () => {
-      router.push("/home");
-   };
+  const handleSubmit = () => {
+    setLoading(true);
+    const getToken = Cookies.get("token");
+    axios.defaults.headers.common["Authorization"] = `Bearer ${getToken}`;
+    axios
+      .post(`https://fazzpay-rose.vercel.app/transaction/top-up`, {
+        amount,
+        url,
+        headers: {
+          Authorization: `Bearer${getToken}`,
+        },
+      })
+      .then((response) => {
+        setLoading(false);
+        openInNewTab(response.data.data.redirectUrl);
+        setShowModaltopup(false);
+        // console.log(response.data.data.redirectUrl);
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoading(false);
+      });
+  };
+  const handleAmount = (e) => {
+    setAmount(e.target.value);
+  };
 
-   const profleClickHandler = () => {
-      router.push("/profile");
-   };
-   const transferClickHandler = () => {
-      router.push("/transfer");
-   };
+  const openInNewTab = (url) => {
+    const newWindow = window.open(url, "_blank", "noopener,noreferrer");
+    if (newWindow) newWindow.opener = null;
+  };
+  const handleShow = () => {
+    console.log(show), setShow(false);
+  };
 
-   const handleClosemodal = () => setShowmodal(false);
-   const handleShowmodal = () => setShowmodal(true);
+  const handleclickshow = () => {
+    console.log(show), setShow(true);
+  };
 
-   const handleLogout = () => {
-      const getToken = Cookies.get("token");
-      dispatch(authActions.logoutThunk(getToken)),
-         Cookies.remove("id"),
-         Cookies.remove("token");
-      toast.success("Logout Success");
-      setTimeout(() => {
-         router.push("/");
-      }, 2000);
-   };
-   // Topup
-   const [price, setPrice] = useState("");
-   const [link, setLink] = useState("");
+  const homeClickHandler = () => {
+    router.push("/home");
+  };
 
-   const valuePrice = (e) => {
-      if (e.target.value.length === 0) setPrice("");
-      if (/[0-9]{1,12}/g.test(e.target.value[e.target.value.length - 1]))
-         setPrice(e.target.value);
-   };
+  const profleClickHandler = () => {
+    router.push("/profile");
+  };
+  const transferClickHandler = () => {
+    router.push("/transfer");
+  };
 
-   const handleTopup = () => {
-      const getToken = Cookies.get("token");
-      axios
-         .post(
-            `https://fazzpay-rose.vercel.app/transaction/top-up`,
-            {
-               amount: price,
-            },
-            {
-               headers: {
-                  Authorization: `Bearer ${getToken}`,
-               },
-            }
-         )
-         .then(
-            (res) => setLink(res.data.data.redirectUrl),
-            setTimeout(() => {
-               setShow(false);
-            }, 7000)
-         )
-         .catch((err) => toast.error(err.response.data.msg));
-   };
+  const handleCloseModaltopup = () => setShowModaltopup(false);
+  const handleShowModaltopup = () => setShowModaltopup(true);
 
-   if (page === "home")
-      return (
-         <>
-            <div className={`${styles["content-left"]} w-100`}>
-               <div className={styles["content-bar"]}>
-                  <div
-                     className={`${styles["content-board"]} ${styles[`border-left`]
-                        }`}
-                  >
-                     <i className="bi bi-grid-fill fs-4 text-primary"></i>
-                     <p className={`${styles["dashboard"]} `}>Dashboard</p>
-                  </div>
-                  <div
-                     className={styles["content-board"]}
-                     onClick={transferClickHandler}
-                  >
-                     <i className="bi bi-wallet2 fs-4"></i>
-                     <p className={styles["transfer"]}>Transfer</p>
-                  </div>
-                  <div
-                     className={styles["content-board"]}
-                     onClick={handleclickshow}
-                  >
-                     <i className="bi bi-plus-circle fs-4"></i>
-                     <p className={styles["topup"]}>Top Up</p>
-                  </div>
-                  <div
-                     className={styles["content-board"]}
-                     onClick={profleClickHandler}
-                  >
-                     <i className="bi bi-person-plus-fill fs-4"></i>
-                     <p className={styles["profile"]}>Profile</p>
-                  </div>
-               </div>
-               <div className={styles["content-logout"]}>
-                  <Image src={icon_log_out} alt="icon_log_out" />
-                  <p className={styles["logout"]} onClick={handleShowmodal}>
-                     Logout
-                  </p>
-               </div>
+  const handleClosemodal = () => setShowmodal(false);
+  const handleShowmodal = () => setShowmodal(true);
+
+  const handleLogout = () => {
+    const getToken = Cookies.get("token");
+    dispatch(authActions.logoutThunk(getToken)), Cookies.remove("id"), Cookies.remove("token");
+    toast.success("Logout Success");
+    setTimeout(() => {
+      router.push("/");
+    }, 800);
+  };
+  // Topup
+  const [price, setPrice] = useState("");
+  const [link, setLink] = useState("");
+
+  const valuePrice = (e) => {
+    if (e.target.value.length === 0) setPrice("");
+    if (/[0-9]{1,12}/g.test(e.target.value[e.target.value.length - 1])) setPrice(e.target.value);
+  };
+
+  const handleTopup2 = () => {
+    const getToken = Cookies.get("token");
+    axios
+      .post(
+        `https://fazzpay-rose.vercel.app/transaction/top-up`,
+        {
+          amount: price,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${getToken}`,
+          },
+        }
+      )
+      .then(
+        (res) => setLink(res.data.data.redirectUrl),
+        setTimeout(() => {
+          setShow(false);
+        }, 7000)
+      )
+      .catch((err) => toast.error(err.response.data.msg));
+  };
+
+  if (page === "home")
+    return (
+      <>
+        <div className={`${styles["content-left"]} w-100`}>
+          <div className={styles["content-bar"]}>
+            <div className={`${styles["content-board"]} ${styles[`border-left`]}`} onClick={homeClickHandler}>
+              <i className="bi bi-grid-fill fs-4 text-primary"></i>
+              <p className={`${styles["dashboard"]} `}>Dashboard</p>
             </div>
-
-            {!show ? null : (
-               <section className={`${styles.box}`}>
-                  <section className={styles.content_box}>
-                     <span
-                        className="d-flex justify-content-between"
-                        onClick={() => setShow(false)}
-                     >
-                        <h3 className={styles.title_modal}>Topup</h3>
-                        <div className={styles.cursor} onClick={handleShow}>
-                           <i className="fa-solid fa-xmark fs-2"></i>
-                        </div>
-                     </span>
-                     <p className={styles.desc_modal}>
-                        Enter the amount of money, and click <br /> submit
-                     </p>
-                     <span className={styles.input_}>
-                        <input
-                           type="tel"
-                           className={styles.arrow}
-                           value={price}
-                           onChange={valuePrice}
-                        />
-                     </span>
-                     <br />
-                     {link === "" ? null : (
-                        <Link href={link} target="_blank">
-                           Topup Payment Click Here
-                        </Link>
-                     )}
-                     <span className="d-flex justify-content-end align-items-center">
-                        <button
-                           onClick={handleTopup}
-                           className={styles.btn_submit}
-                        >
-                           Submit
-                        </button>
-                     </span>
-                  </section>
-               </section>
-            )}
-
-            <ToastContainer
-               position="top-center"
-               autoClose={2000}
-               hideProgressBar={false}
-               closeOnClick={true}
-               pauseOnHover={true}
-               draggable={true}
-               theme="light"
-            />
-            <Modal
-               show={showmodal}
-               onHide={handleClosemodal}
-               backdrop="static"
-               keyboard={false}
-            >
-               <Modal.Header closeButton>
-                  <Modal.Title>confirmation</Modal.Title>
-               </Modal.Header>
-               <Modal.Body>are you sure you want to log out?</Modal.Body>
-               <Modal.Footer>
-                  <Button
-                     variant="success"
-                     className="fw-bold text-bg-success text-white"
-                     onClick={handleLogout}
-                  >
-                     Yes
-                  </Button>
-                  <Button
-                     variant="danger"
-                     className="fw-bold text-bg-danger text-white"
-                     onClick={handleClosemodal}
-                  >
-                     No
-                  </Button>
-               </Modal.Footer>
-            </Modal>
-         </>
-      );
-
-   if (page === "home child")
-      return (
-         <>
-            <div className={`${styles["content-left"]} w-100`}>
-               <div className={styles["content-bar"]}>
-                  <div
-                     className={`${styles["content-board"]} ${styles[`border-left`]
-                        }`}
-                     onClick={homeClickHandler}
-                  >
-                     <i className="bi bi-grid-fill fs-4 text-primary"></i>
-                     <p className={`${styles["dashboard"]} `}>Dashboard</p>
-                  </div>
-                  <div
-                     className={styles["content-board"]}
-                     onClick={transferClickHandler}
-                  >
-                     <i className="bi bi-wallet2 fs-4"></i>
-                     <p className={styles["transfer"]}>Transfer</p>
-                  </div>
-                  <div
-                     className={styles["content-board"]}
-                     onClick={() => setShow(true)}
-                  >
-                     <i className="bi bi-plus-circle fs-4"></i>
-                     <p className={styles["topup"]}>Top Up</p>
-                  </div>
-                  <div
-                     className={styles["content-board"]}
-                     onClick={profleClickHandler}
-                  >
-                     <i className="bi bi-person-plus-fill fs-4"></i>
-                     <p className={styles["profile"]}>Profile</p>
-                  </div>
-               </div>
-               <div className={styles["content-logout"]}>
-                  <Image src={icon_log_out} alt="icon_log_out" />
-                  <p className={styles["logout"]} onClick={handleShowmodal}>
-                     Logout
-                  </p>
-               </div>
+            <div className={styles["content-board"]} onClick={transferClickHandler}>
+              <i className="bi bi-wallet2 fs-4"></i>
+              <p className={styles["transfer"]}>Transfer</p>
             </div>
-
-            {!show ? null : (
-               <section className={`${styles.box}`}>
-                  <section className={styles.content_box}>
-                     <span
-                        className="d-flex justify-content-between"
-                        onClick={() => setShow(false)}
-                     >
-                        <h3 className={styles.title_modal}>Topup</h3>
-                        <div className={styles.cursor} onClick={handleShow}>
-                           <i className="fa-solid fa-xmark fs-2"></i>
-                        </div>
-                     </span>
-                     <p className={styles.desc_modal}>
-                        Enter the amount of money, and click <br /> submit
-                     </p>
-                     <span className={styles.input_}>
-                        <input
-                           type="tel"
-                           className={styles.arrow}
-                           value={price}
-                           onChange={valuePrice}
-                        />
-                     </span>
-                     <br />
-                     {link === "" ? null : (
-                        <Link href={link} target="_blank">
-                           Topup Payment Click Here
-                        </Link>
-                     )}
-                     <span className="d-flex justify-content-end align-items-center">
-                        <button
-                           onClick={handleTopup}
-                           className={styles.btn_submit}
-                        >
-                           Submit
-                        </button>
-                     </span>
-                  </section>
-               </section>
-            )}
-            <ToastContainer
-               position="top-center"
-               autoClose={2000}
-               hideProgressBar={false}
-               closeOnClick={true}
-               pauseOnHover={true}
-               draggable={true}
-               theme="light"
-            />
-            <Modal
-               show={showmodal}
-               onHide={handleClosemodal}
-               backdrop="static"
-               keyboard={false}
-            >
-               <Modal.Header closeButton>
-                  <Modal.Title>confirmation</Modal.Title>
-               </Modal.Header>
-               <Modal.Body>are you sure you want to log out?</Modal.Body>
-               <Modal.Footer>
-                  <Button
-                     variant="success"
-                     className="fw-bold text-bg-success text-white"
-                     onClick={handleLogout}
-                  >
-                     Yes
-                  </Button>
-                  <Button
-                     variant="danger"
-                     className="fw-bold text-bg-danger text-white"
-                     onClick={handleClosemodal}
-                  >
-                     No
-                  </Button>
-               </Modal.Footer>
-            </Modal>
-         </>
-      );
-
-   if (page === "profile") {
-      return (
-         <>
-            <div className={`${styles["content-left"]} w-100`}>
-               <div className={styles["content-bar"]}>
-                  <div
-                     className={`${styles["content-board"]}`}
-                     onClick={homeClickHandler}
-                  >
-                     <i className="bi bi-grid-fill fs-4"></i>
-                     <p className={`${styles["dashboard"]} `}>Dashboard</p>
-                  </div>
-                  <div
-                     className={styles["content-board"]}
-                     onClick={transferClickHandler}
-                  >
-                     <i className="bi bi-wallet2 fs-4"></i>
-                     <p className={styles["transfer"]}>Transfer</p>
-                  </div>
-                  <div
-                     className={styles["content-board"]}
-                     onClick={() => setShow(true)}
-                  >
-                     <i className="bi bi-plus-circle fs-4"></i>
-                     <p className={styles["topup"]}>Top Up</p>
-                  </div>
-                  <div
-                     className={`${styles["content-board"]} ${styles[`border-left`]
-                        }`}
-                  >
-                     <i className="bi bi-person-plus-fill fs-4 text-primary"></i>
-                     <p className={`${styles["profile"]} `}>Profile</p>
-                  </div>
-               </div>
-               <div className={styles["content-logout"]}>
-                  <Image src={icon_log_out} alt="icon_log_out" />
-                  <p className={styles["logout"]} onClick={handleShowmodal}>
-                     Logout
-                  </p>
-               </div>
+            <div className={styles["content-board"]} onClick={handleShowModaltopup}>
+              <i className="bi bi-plus-circle fs-4"></i>
+              <p className={styles["topup"]}>Top Up</p>
             </div>
-
-            {!show ? null : (
-               <section className={`${styles.box}`}>
-                  <section className={styles.content_box}>
-                     <span
-                        className="d-flex justify-content-between"
-                        onClick={() => setShow(false)}
-                     >
-                        <h3 className={styles.title_modal}>Topup</h3>
-                        <div className={styles.cursor} onClick={handleShow}>
-                           <i className="fa-solid fa-xmark fs-2"></i>
-                        </div>
-                     </span>
-                     <p className={styles.desc_modal}>
-                        Enter the amount of money, and click <br /> submit
-                     </p>
-                     <span className={styles.input_}>
-                        <input
-                           type="tel"
-                           className={styles.arrow}
-                           value={price}
-                           onChange={valuePrice}
-                        />
-                     </span>
-                     <br />
-                     {link === "" ? null : (
-                        <Link href={link} target="_blank">
-                           Topup Payment Click Here
-                        </Link>
-                     )}
-                     <span className="d-flex justify-content-end align-items-center">
-                        <button
-                           onClick={handleTopup}
-                           className={styles.btn_submit}
-                        >
-                           Submit
-                        </button>
-                     </span>
-                  </section>
-               </section>
-            )}
-            <ToastContainer
-               position="top-center"
-               autoClose={2000}
-               hideProgressBar={false}
-               closeOnClick={true}
-               pauseOnHover={true}
-               draggable={true}
-               theme="light"
-            />
-            <Modal
-               show={showmodal}
-               onHide={handleClosemodal}
-               backdrop="static"
-               keyboard={false}
-            >
-               <Modal.Header closeButton>
-                  <Modal.Title>confirmation</Modal.Title>
-               </Modal.Header>
-               <Modal.Body>are you sure you want to log out?</Modal.Body>
-               <Modal.Footer>
-                  <Button
-                     variant="success"
-                     className="fw-bold text-bg-success text-white"
-                     onClick={handleLogout}
-                  >
-                     Yes
-                  </Button>
-                  <Button
-                     variant="danger"
-                     className="fw-bold text-bg-danger text-white"
-                     onClick={handleClosemodal}
-                  >
-                     No
-                  </Button>
-               </Modal.Footer>
-            </Modal>
-         </>
-      );
-   }
-
-   if (page === "profile child")
-      return (
-         <>
-            <div className={`${styles["content-left"]} w-100`}>
-               <div className={styles["content-bar"]}>
-                  <div
-                     className={`${styles["content-board"]}`}
-                     onClick={homeClickHandler}
-                  >
-                     <i className="bi bi-grid-fill fs-4"></i>
-                     <p className={`${styles["dashboard"]} `}>Dashboard</p>
-                  </div>
-                  <div
-                     className={styles["content-board"]}
-                     onClick={transferClickHandler}
-                  >
-                     <i className="bi bi-wallet2 fs-4"></i>
-                     <p className={styles["transfer"]}>Transfer</p>
-                  </div>
-                  <div
-                     className={styles["content-board"]}
-                     onClick={() => setShow(true)}
-                  >
-                     <i className="bi bi-plus-circle fs-4"></i>
-                     <p className={styles["topup"]}>Top Up</p>
-                  </div>
-                  <div
-                     className={`${styles["content-board"]} ${styles[`border-left`]
-                        }`}
-                     onClick={profleClickHandler}
-                  >
-                     <i className="bi bi-person-plus-fill fs-4 text-primary"></i>
-                     <p className={`${styles["profile"]} `}>Profile</p>
-                  </div>
-               </div>
-               <div className={styles["content-logout"]}>
-                  <Image src={icon_log_out} alt="icon_log_out" />
-                  <p className={styles["logout"]} onClick={handleShowmodal}>
-                     Logout
-                  </p>
-               </div>
+            <div className={styles["content-board"]} onClick={profleClickHandler}>
+              <i className="bi bi-person-plus-fill fs-4"></i>
+              <p className={styles["profile"]}>Profile</p>
             </div>
+          </div>
+          <div className={styles["content-logout"]}>
+            <Image src={icon_log_out} alt="icon_log_out" />
+            <p className={styles["logout"]} onClick={handleShowmodal}>
+              Logout
+            </p>
+          </div>
+        </div>
 
-            {!show ? null : (
-               <section className={`${styles.box}`}>
-                  <section className={styles.content_box}>
-                     <span
-                        className="d-flex justify-content-between"
-                        onClick={() => setShow(false)}
-                     >
-                        <h3 className={styles.title_modal}>Topup</h3>
-                        <div className={styles.cursor} onClick={handleShow}>
-                           <i className="fa-solid fa-xmark fs-2"></i>
-                        </div>
-                     </span>
-                     <p className={styles.desc_modal}>
-                        Enter the amount of money, and click <br /> submit
-                     </p>
-                     <span className={styles.input_}>
-                        <input
-                           type="tel"
-                           className={styles.arrow}
-                           value={price}
-                           onChange={valuePrice}
-                        />
-                     </span>
-                     <br />
-                     {link === "" ? null : (
-                        <Link href={link} target="_blank">
-                           Topup Payment Click Here
-                        </Link>
-                     )}
-                     <span className="d-flex justify-content-end align-items-center">
-                        <button
-                           onClick={handleTopup}
-                           className={styles.btn_submit}
-                        >
-                           Submit
-                        </button>
-                     </span>
-                  </section>
-               </section>
-            )}
-            <ToastContainer
-               position="top-center"
-               autoClose={2000}
-               hideProgressBar={false}
-               closeOnClick={true}
-               pauseOnHover={true}
-               draggable={true}
-               theme="light"
-            />
-            <Modal
-               show={showmodal}
-               onHide={handleClosemodal}
-               backdrop="static"
-               keyboard={false}
-            >
-               <Modal.Header closeButton>
-                  <Modal.Title>confirmation</Modal.Title>
-               </Modal.Header>
-               <Modal.Body>are you sure you want to log out?</Modal.Body>
-               <Modal.Footer>
-                  <Button
-                     variant="success"
-                     className="fw-bold text-bg-success text-white"
-                     onClick={handleLogout}
-                  >
-                     Yes
-                  </Button>
-                  <Button
-                     variant="danger"
-                     className="fw-bold text-bg-danger text-white"
-                     onClick={handleClosemodal}
-                  >
-                     No
-                  </Button>
-               </Modal.Footer>
-            </Modal>
-         </>
-      );
+        {/* {!show ? null : (
+          <section className={`${styles.box}`}>
+            <section className={styles.content_box}>
+              <span className="d-flex justify-content-between" onClick={() => setShow(false)}>
+                <h3 className={styles.title_modal}>Topup</h3>
+                <div className={styles.cursor} onClick={handleShow}>
+                  <i className="fa-solid fa-xmark fs-2"></i>
+                </div>
+              </span>
+              <p className={styles.desc_modal}>Enter the amount of money, and click submit</p>
+              <span className={styles.input_}>
+                <input type="tel" className={styles.arrow} value={price} onChange={valuePrice} />
+                <input
+                  type="number"
+                  className={styles.arrow}
+                  value={price}
+                  onKeyPress={inputNumber}
+                  onChange={
+                    handleAmount
+                    console.log(amount);
+                  }
+                />
+              </span>
+             {link === "" ? null : (
+                <Link href={link} target="_blank">
+                  Topup Payment Click Here
+                </Link>
+              )} 
+              <span className="d-flex justify-content-end align-items-center">
+                <button
+                  onClick={() => {
+                    handleTopup, console.log(amount);
+                  }}
+                  className={styles.btn_submit}
+                >
+                  Submit
+                </button>
+              </span>
+            </section>
+          </section>
+        )} */}
+        <Modal show={showmodaltopup} onHide={handleCloseModaltopup} backdrop="static" keyboard={false}>
+          <Modal.Header closeButton>
+            <Modal.Title>Topup</Modal.Title>
+          </Modal.Header>
+          <Modal.Body className={styles["title-topUp"]}>Enter the amount of money, and click submit</Modal.Body>
 
-   if (page === "transfer")
-      return (
-         <>
-            <div className={`${styles["content-left"]} w-100`}>
-               <div className={styles["content-bar"]}>
-                  <div
-                     className={`${styles["content-board"]}`}
-                     onClick={homeClickHandler}
-                  >
-                     <i className="bi bi-grid-fill fs-4"></i>
-                     <p className={`${styles["dashboard"]} `}>Dashboard</p>
-                  </div>
-                  <div
-                     className={`${styles["content-board"]} ${styles[`border-left`]
-                        }`}
-                  >
-                     <i className="bi bi-wallet2 fs-4 text-primary"></i>
-                     <p className={styles["transfer"]}>Transfer</p>
-                  </div>
-                  <div
-                     className={styles["content-board"]}
-                     onClick={() => setShow(true)}
-                  >
-                     <i className="bi bi-plus-circle fs-4"></i>
-                     <p className={styles["topup"]}>Top Up</p>
-                  </div>
-                  <div
-                     className={`${styles["content-board"]} `}
-                     onClick={profleClickHandler}
-                  >
-                     <i className="bi bi-person-plus-fill fs-4 "></i>
-                     <p className={`${styles["profile"]}`}>Profile</p>
-                  </div>
-               </div>
-               <div className={styles["content-logout"]}>
-                  <Image src={icon_log_out} alt="icon_log_out" />
-                  <p className={styles["logout"]} onClick={handleShowmodal}>
-                     Logout
-                  </p>
-               </div>
+          <input type="text" className={`${styles["inputs"]} form-control form-control-sm validate ml-0`} onKeyPress={inputNumber} onChange={handleAmount} />
+          {loading ? (
+            <div className={styles["loadings"]}>
+              <p>Please Wait Your Payment on Process . . . </p>
             </div>
+          ) : (
+            ""
+          )}
 
-            {!show ? null : (
-               <section className={`${styles.box}`}>
-                  <section className={styles.content_box}>
-                     <span
-                        className="d-flex justify-content-between"
-                        onClick={() => setShow(false)}
-                     >
-                        <h3 className={styles.title_modal}>Topup</h3>
-                        <div className={styles.cursor} onClick={handleShow}>
-                           <i className="fa-solid fa-xmark fs-2"></i>
-                        </div>
-                     </span>
-                     <p className={styles.desc_modal}>
-                        Enter the amount of money, and click <br /> submit
-                     </p>
-                     <span className={styles.input_}>
-                        <input
-                           type="tel"
-                           className={styles.arrow}
-                           value={price}
-                           onChange={valuePrice}
-                        />
-                     </span>
-                     <br />
-                     {link === "" ? null : (
-                        <Link href={link} target="_blank">
-                           Topup Payment Click Here
-                        </Link>
-                     )}
-                     <span className="d-flex justify-content-end align-items-center">
-                        <button
-                           onClick={handleTopup}
-                           className={styles.btn_submit}
-                        >
-                           Submit
-                        </button>
-                     </span>
-                  </section>
-               </section>
-            )}
-            <ToastContainer
-               position="top-center"
-               autoClose={2000}
-               hideProgressBar={false}
-               closeOnClick={true}
-               pauseOnHover={true}
-               draggable={true}
-               theme="light"
-            />
-            <Modal
-               show={showmodal}
-               onHide={handleClosemodal}
-               backdrop="static"
-               keyboard={false}
-            >
-               <Modal.Header closeButton>
-                  <Modal.Title>confirmation</Modal.Title>
-               </Modal.Header>
-               <Modal.Body>are you sure you want to log out?</Modal.Body>
-               <Modal.Footer>
-                  <Button
-                     variant="success"
-                     className="fw-bold text-bg-success text-white"
-                     onClick={handleLogout}
-                  >
-                     Yes
-                  </Button>
-                  <Button
-                     variant="danger"
-                     className="fw-bold text-bg-danger text-white"
-                     onClick={handleClosemodal}
-                  >
-                     No
-                  </Button>
-               </Modal.Footer>
-            </Modal>
-         </>
-      );
+          <Modal.Footer>
+            <Button variant="primary" className={` fw-bold text-bg-secondary text-white border-0 ${styles["submits"]} `} onClick={handleSubmit}>
+              {loading ? (
+                <div className={`${styles["lds-ring"]}`}>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                </div>
+              ) : (
+                "submit"
+              )}
+            </Button>
+          </Modal.Footer>
+        </Modal>
+        <ToastContainer position="top-center" autoClose={2000} hideProgressBar={false} closeOnClick={true} pauseOnHover={true} draggable={true} theme="light" />
+        <Modal show={showmodal} onHide={handleClosemodal} backdrop="static" keyboard={false}>
+          <Modal.Header closeButton>
+            <Modal.Title>confirmation</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>are you sure you want to log out?</Modal.Body>
+          <Modal.Footer>
+            <Button variant="success" className="fw-bold text-bg-success text-white" onClick={handleLogout}>
+              Yes
+            </Button>
+            <Button variant="danger" className="fw-bold text-bg-danger text-white" onClick={handleClosemodal}>
+              No
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      </>
+    );
 
-   if (page === "transfer child")
-      return (
-         <>
-            <div className={`${styles["content-left"]} w-100`}>
-               <div className={styles["content-bar"]}>
-                  <div
-                     className={`${styles["content-board"]}`}
-                     onClick={homeClickHandler}
-                  >
-                     <i className="bi bi-grid-fill fs-4"></i>
-                     <p className={`${styles["dashboard"]} `}>Dashboard</p>
-                  </div>
-                  <div
-                     className={`${styles["content-board"]} ${styles[`border-left`]
-                        }`}
-                     onClick={transferClickHandler}
-                  >
-                     <i className="bi bi-wallet2 fs-4 text-primary"></i>
-                     <p className={styles["transfer"]}>Transfer</p>
-                  </div>
-                  <div
-                     className={styles["content-board"]}
-                     onClick={() => setShow(true)}
-                  >
-                     <i className="bi bi-plus-circle fs-4"></i>
-                     <p className={styles["topup"]}>Top Up</p>
-                  </div>
-                  <div
-                     className={`${styles["content-board"]} `}
-                     onClick={profleClickHandler}
-                  >
-                     <i className="bi bi-person-plus-fill fs-4 "></i>
-                     <p className={`${styles["profile"]}`}>Profile</p>
-                  </div>
-               </div>
-               <div className={styles["content-logout"]}>
-                  <Image src={icon_log_out} alt="icon_log_out" />
-                  <p className={styles["logout"]} onClick={handleLogout}>
-                     Logout
-                  </p>
-               </div>
+  if (page === "home child")
+    return (
+      <>
+        <div className={`${styles["content-left"]} w-100`}>
+          <div className={styles["content-bar"]}>
+            <div className={`${styles["content-board"]} ${styles[`border-left`]}`} onClick={homeClickHandler}>
+              <i className="bi bi-grid-fill fs-4 text-primary"></i>
+              <p className={`${styles["dashboard"]} `}>Dashboard</p>
             </div>
-            {!show ? null : (
-               <section className={`${styles.box}`}>
-                  <section className={styles.content_box}>
-                     <span
-                        className="d-flex justify-content-between"
-                        onClick={() => setShow(false)}
-                     >
-                        <h3 className={styles.title_modal}>Topup</h3>
-                        <div className={styles.cursor} onClick={handleShow}>
-                           <i className="fa-solid fa-xmark fs-2"></i>
-                        </div>
-                     </span>
-                     <p className={styles.desc_modal}>
-                        Enter the amount of money, and click <br /> submit
-                     </p>
-                     <span className={styles.input_}>
-                        <input
-                           type="tel"
-                           className={styles.arrow}
-                           value={price}
-                           onChange={valuePrice}
-                        />
-                     </span>
-                     <br />
-                     {link === "" ? null : (
-                        <Link href={link} target="_blank">
-                           Topup Payment Click Here
-                        </Link>
-                     )}
-                     <span className="d-flex justify-content-end align-items-center">
-                        <button
-                           className={styles.btn_submit}
-                           onClick={handleTopup}
-                        >
-                           Submit
-                        </button>
-                     </span>
-                  </section>
-               </section>
-            )}
-            <ToastContainer
-               position="top-center"
-               autoClose={2000}
-               hideProgressBar={false}
-               closeOnClick={true}
-               pauseOnHover={true}
-               draggable={true}
-               theme="light"
-            />
-            <Modal
-               show={showmodal}
-               onHide={handleClosemodal}
-               backdrop="static"
-               keyboard={false}
-            >
-               <Modal.Header closeButton>
-                  <Modal.Title>confirmation</Modal.Title>
-               </Modal.Header>
-               <Modal.Body>are you sure you want to log out?</Modal.Body>
-               <Modal.Footer>
-                  <Button
-                     variant="success"
-                     className="fw-bold text-bg-success text-white"
-                     onClick={handleLogout}
-                  >
-                     Yes
-                  </Button>
-                  <Button
-                     variant="danger"
-                     className="fw-bold text-bg-danger text-white"
-                     onClick={handleClosemodal}
-                  >
-                     No
-                  </Button>
-               </Modal.Footer>
-            </Modal>
-         </>
-      );
+            <div className={styles["content-board"]} onClick={transferClickHandler}>
+              <i className="bi bi-wallet2 fs-4"></i>
+              <p className={styles["transfer"]}>Transfer</p>
+            </div>
+            <div className={styles["content-board"]} onClick={handleShowModaltopup}>
+              <i className="bi bi-plus-circle fs-4"></i>
+              <p className={styles["topup"]}>Top Up</p>
+            </div>
+            <div className={styles["content-board"]} onClick={profleClickHandler}>
+              <i className="bi bi-person-plus-fill fs-4"></i>
+              <p className={styles["profile"]}>Profile</p>
+            </div>
+          </div>
+          <div className={styles["content-logout"]}>
+            <Image src={icon_log_out} alt="icon_log_out" />
+            <p className={styles["logout"]} onClick={handleShowmodal}>
+              Logout
+            </p>
+          </div>
+        </div>
+
+        {!show ? null : (
+          <section className={`${styles.box}`}>
+            <section className={styles.content_box}>
+              <span className="d-flex justify-content-between" onClick={() => setShow(false)}>
+                <h3 className={styles.title_modal}>Topup</h3>
+                <div className={styles.cursor} onClick={handleShow}>
+                  <i className="fa-solid fa-xmark fs-2"></i>
+                </div>
+              </span>
+              <p className={styles.desc_modal}>
+                Enter the amount of money, and click <br /> submit
+              </p>
+              <span className={styles.input_}>
+                <input type="tel" className={styles.arrow} value={price} onChange={valuePrice} />
+              </span>
+              <br />
+              {link === "" ? null : (
+                <Link href={link} target="_blank">
+                  Topup Payment Click Here
+                </Link>
+              )}
+              <span className="d-flex justify-content-end align-items-center">
+                <button onClick={handleTopup} className={styles.btn_submit}>
+                  Submit
+                </button>
+              </span>
+            </section>
+          </section>
+        )}
+        <Modal show={showmodaltopup} onHide={handleCloseModaltopup} backdrop="static" keyboard={false}>
+          <Modal.Header closeButton>
+            <Modal.Title>Topup</Modal.Title>
+          </Modal.Header>
+          <Modal.Body className={styles["title-topUp"]}>Enter the amount of money, and click submit</Modal.Body>
+
+          <input type="text" className={`${styles["inputs"]} form-control form-control-sm validate ml-0`} onKeyPress={inputNumber} onChange={handleAmount} />
+          {loading ? (
+            <div className={styles["loadings"]}>
+              <p>Please Wait Your Payment on Process . . . </p>
+            </div>
+          ) : (
+            ""
+          )}
+
+          <Modal.Footer>
+            <Button variant="primary" className={` fw-bold text-bg-secondary text-white border-0 ${styles["submits"]} `} onClick={handleSubmit}>
+              {loading ? (
+                <div className={`${styles["lds-ring"]}`}>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                </div>
+              ) : (
+                "submit"
+              )}
+            </Button>
+          </Modal.Footer>
+        </Modal>
+        <ToastContainer position="top-center" autoClose={2000} hideProgressBar={false} closeOnClick={true} pauseOnHover={true} draggable={true} theme="light" />
+        <Modal show={showmodal} onHide={handleClosemodal} backdrop="static" keyboard={false}>
+          <Modal.Header closeButton>
+            <Modal.Title>confirmation</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>are you sure you want to log out?</Modal.Body>
+          <Modal.Footer>
+            <Button variant="success" className="fw-bold text-bg-success text-white" onClick={handleLogout}>
+              Yes
+            </Button>
+            <Button variant="danger" className="fw-bold text-bg-danger text-white" onClick={handleClosemodal}>
+              No
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      </>
+    );
+
+  if (page === "profile") {
+    return (
+      <>
+        <div className={`${styles["content-left"]} w-100`}>
+          <div className={styles["content-bar"]}>
+            <div className={`${styles["content-board"]}`} onClick={homeClickHandler}>
+              <i className="bi bi-grid-fill fs-4"></i>
+              <p className={`${styles["dashboard"]} `}>Dashboard</p>
+            </div>
+            <div className={styles["content-board"]} onClick={transferClickHandler}>
+              <i className="bi bi-wallet2 fs-4"></i>
+              <p className={styles["transfer"]}>Transfer</p>
+            </div>
+            <div className={styles["content-board"]} onClick={handleShowModaltopup}>
+              <i className="bi bi-plus-circle fs-4"></i>
+              <p className={styles["topup"]}>Top Up</p>
+            </div>
+            <div className={`${styles["content-board"]} ${styles[`border-left`]}`}>
+              <i className="bi bi-person-plus-fill fs-4 text-primary"></i>
+              <p className={`${styles["profile"]} `}>Profile</p>
+            </div>
+          </div>
+          <div className={styles["content-logout"]}>
+            <Image src={icon_log_out} alt="icon_log_out" />
+            <p className={styles["logout"]} onClick={handleShowmodal}>
+              Logout
+            </p>
+          </div>
+        </div>
+
+        {!show ? null : (
+          <section className={`${styles.box}`}>
+            <section className={styles.content_box}>
+              <span className="d-flex justify-content-between" onClick={() => setShow(false)}>
+                <h3 className={styles.title_modal}>Topup</h3>
+                <div className={styles.cursor} onClick={handleShow}>
+                  <i className="fa-solid fa-xmark fs-2"></i>
+                </div>
+              </span>
+              <p className={styles.desc_modal}>
+                Enter the amount of money, and click <br /> submit
+              </p>
+              <span className={styles.input_}>
+                <input type="tel" className={styles.arrow} value={price} onChange={valuePrice} />
+              </span>
+              <br />
+              {link === "" ? null : (
+                <Link href={link} target="_blank">
+                  Topup Payment Click Here
+                </Link>
+              )}
+              <span className="d-flex justify-content-end align-items-center">
+                <button onClick={handleTopup} className={styles.btn_submit}>
+                  Submit
+                </button>
+              </span>
+            </section>
+          </section>
+        )}
+        <Modal show={showmodaltopup} onHide={handleCloseModaltopup} backdrop="static" keyboard={false}>
+          <Modal.Header closeButton>
+            <Modal.Title>Topup</Modal.Title>
+          </Modal.Header>
+          <Modal.Body className={styles["title-topUp"]}>Enter the amount of money, and click submit</Modal.Body>
+
+          <input type="text" className={`${styles["inputs"]} form-control form-control-sm validate ml-0`} onKeyPress={inputNumber} onChange={handleAmount} />
+          {loading ? (
+            <div className={styles["loadings"]}>
+              <p>Please Wait Your Payment on Process . . . </p>
+            </div>
+          ) : (
+            ""
+          )}
+
+          <Modal.Footer>
+            <Button variant="primary" className={` fw-bold text-bg-secondary text-white border-0 ${styles["submits"]} `} onClick={handleSubmit}>
+              {loading ? (
+                <div className={`${styles["lds-ring"]}`}>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                </div>
+              ) : (
+                "submit"
+              )}
+            </Button>
+          </Modal.Footer>
+        </Modal>
+        <ToastContainer position="top-center" autoClose={2000} hideProgressBar={false} closeOnClick={true} pauseOnHover={true} draggable={true} theme="light" />
+        <Modal show={showmodal} onHide={handleClosemodal} backdrop="static" keyboard={false}>
+          <Modal.Header closeButton>
+            <Modal.Title>confirmation</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>are you sure you want to log out?</Modal.Body>
+          <Modal.Footer>
+            <Button variant="success" className="fw-bold text-bg-success text-white" onClick={handleLogout}>
+              Yes
+            </Button>
+            <Button variant="danger" className="fw-bold text-bg-danger text-white" onClick={handleClosemodal}>
+              No
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      </>
+    );
+  }
+
+  if (page === "profile child")
+    return (
+      <>
+        <div className={`${styles["content-left"]} w-100`}>
+          <div className={styles["content-bar"]}>
+            <div className={`${styles["content-board"]}`} onClick={homeClickHandler}>
+              <i className="bi bi-grid-fill fs-4"></i>
+              <p className={`${styles["dashboard"]} `}>Dashboard</p>
+            </div>
+            <div className={styles["content-board"]} onClick={transferClickHandler}>
+              <i className="bi bi-wallet2 fs-4"></i>
+              <p className={styles["transfer"]}>Transfer</p>
+            </div>
+            <div className={styles["content-board"]} onClick={handleShowModaltopup}>
+              <i className="bi bi-plus-circle fs-4"></i>
+              <p className={styles["topup"]}>Top Up</p>
+            </div>
+            <div className={`${styles["content-board"]} ${styles[`border-left`]}`} onClick={profleClickHandler}>
+              <i className="bi bi-person-plus-fill fs-4 text-primary"></i>
+              <p className={`${styles["profile"]} `}>Profile</p>
+            </div>
+          </div>
+          <div className={styles["content-logout"]}>
+            <Image src={icon_log_out} alt="icon_log_out" />
+            <p className={styles["logout"]} onClick={handleShowmodal}>
+              Logout
+            </p>
+          </div>
+        </div>
+
+        {!show ? null : (
+          <section className={`${styles.box}`}>
+            <section className={styles.content_box}>
+              <span className="d-flex justify-content-between" onClick={() => setShow(false)}>
+                <h3 className={styles.title_modal}>Topup</h3>
+                <div className={styles.cursor} onClick={handleShow}>
+                  <i className="fa-solid fa-xmark fs-2"></i>
+                </div>
+              </span>
+              <p className={styles.desc_modal}>
+                Enter the amount of money, and click <br /> submit
+              </p>
+              <span className={styles.input_}>
+                <input type="tel" className={styles.arrow} value={price} onChange={valuePrice} />
+              </span>
+              <br />
+              {link === "" ? null : (
+                <Link href={link} target="_blank">
+                  Topup Payment Click Here
+                </Link>
+              )}
+              <span className="d-flex justify-content-end align-items-center">
+                <button onClick={handleTopup} className={styles.btn_submit}>
+                  Submit
+                </button>
+              </span>
+            </section>
+          </section>
+        )}
+        <Modal show={showmodaltopup} onHide={handleCloseModaltopup} backdrop="static" keyboard={false}>
+          <Modal.Header closeButton>
+            <Modal.Title>Topup</Modal.Title>
+          </Modal.Header>
+          <Modal.Body className={styles["title-topUp"]}>Enter the amount of money, and click submit</Modal.Body>
+
+          <input type="text" className={`${styles["inputs"]} form-control form-control-sm validate ml-0`} onKeyPress={inputNumber} onChange={handleAmount} />
+          {loading ? (
+            <div className={styles["loadings"]}>
+              <p>Please Wait Your Payment on Process . . . </p>
+            </div>
+          ) : (
+            ""
+          )}
+
+          <Modal.Footer>
+            <Button variant="primary" className={` fw-bold text-bg-secondary text-white border-0 ${styles["submits"]} `} onClick={handleSubmit}>
+              {loading ? (
+                <div className={`${styles["lds-ring"]}`}>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                </div>
+              ) : (
+                "submit"
+              )}
+            </Button>
+          </Modal.Footer>
+        </Modal>
+        <ToastContainer position="top-center" autoClose={2000} hideProgressBar={false} closeOnClick={true} pauseOnHover={true} draggable={true} theme="light" />
+        <Modal show={showmodal} onHide={handleClosemodal} backdrop="static" keyboard={false}>
+          <Modal.Header closeButton>
+            <Modal.Title>confirmation</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>are you sure you want to log out?</Modal.Body>
+          <Modal.Footer>
+            <Button variant="success" className="fw-bold text-bg-success text-white" onClick={handleLogout}>
+              Yes
+            </Button>
+            <Button variant="danger" className="fw-bold text-bg-danger text-white" onClick={handleClosemodal}>
+              No
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      </>
+    );
+
+  if (page === "transfer")
+    return (
+      <>
+        <div className={`${styles["content-left"]} w-100`}>
+          <div className={styles["content-bar"]}>
+            <div className={`${styles["content-board"]}`} onClick={homeClickHandler}>
+              <i className="bi bi-grid-fill fs-4"></i>
+              <p className={`${styles["dashboard"]} `}>Dashboard</p>
+            </div>
+            <div className={`${styles["content-board"]} ${styles[`border-left`]}`}>
+              <i className="bi bi-wallet2 fs-4 text-primary"></i>
+              <p className={styles["transfer"]}>Transfer</p>
+            </div>
+            <div className={styles["content-board"]} onClick={handleShowModaltopup}>
+              <i className="bi bi-plus-circle fs-4"></i>
+              <p className={styles["topup"]}>Top Up</p>
+            </div>
+            <div className={`${styles["content-board"]} `} onClick={profleClickHandler}>
+              <i className="bi bi-person-plus-fill fs-4 "></i>
+              <p className={`${styles["profile"]}`}>Profile</p>
+            </div>
+          </div>
+          <div className={styles["content-logout"]}>
+            <Image src={icon_log_out} alt="icon_log_out" />
+            <p className={styles["logout"]} onClick={handleShowmodal}>
+              Logout
+            </p>
+          </div>
+        </div>
+
+        {!show ? null : (
+          <section className={`${styles.box}`}>
+            <section className={styles.content_box}>
+              <span className="d-flex justify-content-between" onClick={() => setShow(false)}>
+                <h3 className={styles.title_modal}>Topup</h3>
+                <div className={styles.cursor} onClick={handleShow}>
+                  <i className="fa-solid fa-xmark fs-2"></i>
+                </div>
+              </span>
+              <p className={styles.desc_modal}>
+                Enter the amount of money, and click <br /> submit
+              </p>
+              <span className={styles.input_}>
+                <input type="tel" className={styles.arrow} value={price} onChange={valuePrice} />
+              </span>
+              <br />
+              {link === "" ? null : (
+                <Link href={link} target="_blank">
+                  Topup Payment Click Here
+                </Link>
+              )}
+              <span className="d-flex justify-content-end align-items-center">
+                <button onClick={handleTopup} className={styles.btn_submit}>
+                  Submit
+                </button>
+              </span>
+            </section>
+          </section>
+        )}
+        <Modal show={showmodaltopup} onHide={handleCloseModaltopup} backdrop="static" keyboard={false}>
+          <Modal.Header closeButton>
+            <Modal.Title>Topup</Modal.Title>
+          </Modal.Header>
+          <Modal.Body className={styles["title-topUp"]}>Enter the amount of money, and click submit</Modal.Body>
+
+          <input type="text" className={`${styles["inputs"]} form-control form-control-sm validate ml-0`} onKeyPress={inputNumber} onChange={handleAmount} />
+          {loading ? (
+            <div className={styles["loadings"]}>
+              <p>Please Wait Your Payment on Process . . . </p>
+            </div>
+          ) : (
+            ""
+          )}
+
+          <Modal.Footer>
+            <Button variant="primary" className={` fw-bold text-bg-secondary text-white border-0 ${styles["submits"]} `} onClick={handleSubmit}>
+              {loading ? (
+                <div className={`${styles["lds-ring"]}`}>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                </div>
+              ) : (
+                "submit"
+              )}
+            </Button>
+          </Modal.Footer>
+        </Modal>
+        <ToastContainer position="top-center" autoClose={2000} hideProgressBar={false} closeOnClick={true} pauseOnHover={true} draggable={true} theme="light" />
+        <Modal show={showmodal} onHide={handleClosemodal} backdrop="static" keyboard={false}>
+          <Modal.Header closeButton>
+            <Modal.Title>confirmation</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>are you sure you want to log out?</Modal.Body>
+          <Modal.Footer>
+            <Button variant="success" className="fw-bold text-bg-success text-white" onClick={handleLogout}>
+              Yes
+            </Button>
+            <Button variant="danger" className="fw-bold text-bg-danger text-white" onClick={handleClosemodal}>
+              No
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      </>
+    );
+
+  if (page === "transfer child")
+    return (
+      <>
+        <div className={`${styles["content-left"]} w-100`}>
+          <div className={styles["content-bar"]}>
+            <div className={`${styles["content-board"]}`} onClick={homeClickHandler}>
+              <i className="bi bi-grid-fill fs-4"></i>
+              <p className={`${styles["dashboard"]} `}>Dashboard</p>
+            </div>
+            <div className={`${styles["content-board"]} ${styles[`border-left`]}`} onClick={transferClickHandler}>
+              <i className="bi bi-wallet2 fs-4 text-primary"></i>
+              <p className={styles["transfer"]}>Transfer</p>
+            </div>
+            <div className={styles["content-board"]} onClick={handleShowModaltopup}>
+              <i className="bi bi-plus-circle fs-4"></i>
+              <p className={styles["topup"]}>Top Up</p>
+            </div>
+            <div className={`${styles["content-board"]} `} onClick={profleClickHandler}>
+              <i className="bi bi-person-plus-fill fs-4 "></i>
+              <p className={`${styles["profile"]}`}>Profile</p>
+            </div>
+          </div>
+          <div className={styles["content-logout"]}>
+            <Image src={icon_log_out} alt="icon_log_out" />
+            <p className={styles["logout"]} onClick={handleLogout}>
+              Logout
+            </p>
+          </div>
+        </div>
+        {!show ? null : (
+          <section className={`${styles.box}`}>
+            <section className={styles.content_box}>
+              <span className="d-flex justify-content-between" onClick={() => setShow(false)}>
+                <h3 className={styles.title_modal}>Topup</h3>
+                <div className={styles.cursor} onClick={handleShow}>
+                  <i className="fa-solid fa-xmark fs-2"></i>
+                </div>
+              </span>
+              <p className={styles.desc_modal}>
+                Enter the amount of money, and click <br /> submit
+              </p>
+              <span className={styles.input_}>
+                <input type="tel" className={styles.arrow} value={price} onChange={valuePrice} />
+              </span>
+              <br />
+              {link === "" ? null : (
+                <Link href={link} target="_blank">
+                  Topup Payment Click Here
+                </Link>
+              )}
+              <span className="d-flex justify-content-end align-items-center">
+                <button className={styles.btn_submit} onClick={handleTopup}>
+                  Submit
+                </button>
+              </span>
+            </section>
+          </section>
+        )}
+        <Modal show={showmodaltopup} onHide={handleCloseModaltopup} backdrop="static" keyboard={false}>
+          <Modal.Header closeButton>
+            <Modal.Title>Topup</Modal.Title>
+          </Modal.Header>
+          <Modal.Body className={styles["title-topUp"]}>Enter the amount of money, and click submit</Modal.Body>
+
+          <input type="text" className={`${styles["inputs"]} form-control form-control-sm validate ml-0`} onKeyPress={inputNumber} onChange={handleAmount} />
+          {loading ? (
+            <div className={styles["loadings"]}>
+              <p>Please Wait Your Payment on Process . . . </p>
+            </div>
+          ) : (
+            ""
+          )}
+
+          <Modal.Footer>
+            <Button variant="primary" className={` fw-bold text-bg-secondary text-white border-0 ${styles["submits"]} `} onClick={handleSubmit}>
+              {loading ? (
+                <div className={`${styles["lds-ring"]}`}>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                </div>
+              ) : (
+                "submit"
+              )}
+            </Button>
+          </Modal.Footer>
+        </Modal>
+        <ToastContainer position="top-center" autoClose={2000} hideProgressBar={false} closeOnClick={true} pauseOnHover={true} draggable={true} theme="light" />
+        <Modal show={showmodal} onHide={handleClosemodal} backdrop="static" keyboard={false}>
+          <Modal.Header closeButton>
+            <Modal.Title>confirmation</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>are you sure you want to log out?</Modal.Body>
+          <Modal.Footer>
+            <Button variant="success" className="fw-bold text-bg-success text-white" onClick={handleLogout}>
+              Yes
+            </Button>
+            <Button variant="danger" className="fw-bold text-bg-danger text-white" onClick={handleClosemodal}>
+              No
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      </>
+    );
 }
 
 export default Sidebar;

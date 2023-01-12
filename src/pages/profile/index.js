@@ -75,7 +75,7 @@ function Profile() {
     toast.success("Logout Success"),
       setTimeout(() => {
         router.push("/");
-      }, 2000);
+      }, 1000);
   };
   const handleCancel = () => {
     setDisplay(profile.image), setBtnsave(false);

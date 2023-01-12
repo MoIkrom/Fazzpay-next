@@ -2,6 +2,9 @@
   padding: 0 2rem;
 }
 
+.submits {
+  border: none !important;
+}
 .main {
   min-height: 100vh;
   padding: 4rem 0;
@@ -61,8 +64,7 @@
   border-radius: 5px;
   padding: 0.75rem;
   font-size: 1.1rem;
-  font-family: Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono,
-    Bitstream Vera Sans Mono, Courier New, monospace;
+  font-family: Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
 }
 
 .grid {

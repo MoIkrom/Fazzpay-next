@@ -1,3 +1,75 @@
+/* Start Modal */
+.title-topUp {
+  position: relative;
+  left: 4.7rem;
+}
+.submits {
+  background-color: #6379f4 !important;
+}
+.inputs {
+  width: 300px;
+  height: 60px;
+  margin-top: 5px;
+  margin-bottom: 30px;
+  position: relative;
+  left: 6rem;
+  font-size: 28px;
+  padding-bottom: 10px;
+  font-family: monospace;
+  text-align: center;
+}
+
+/* End Modal */
+
+/* Start Loading */
+.lds-ring {
+  display: flex;
+  position: relative;
+  width: 80px;
+  height: 26px;
+  justify-content: center;
+  align-items: center;
+}
+.lds-ring div {
+  box-sizing: border-box;
+  display: block;
+  position: absolute;
+  width: 25px;
+  height: 25px;
+  margin: 8px;
+  border: 3px solid #f8f9fa;
+  border-radius: 68%;
+  animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  border-color: #f8f9fa transparent transparent transparent;
+}
+.lds-ring div:nth-child(1) {
+  animation-delay: -0.45s;
+}
+.lds-ring div:nth-child(2) {
+  animation-delay: -0.3s;
+}
+.lds-ring div:nth-child(3) {
+  animation-delay: -0.15s;
+}
+@keyframes lds-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* End Loading */
+
+.loadings {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  top: -15px;
+  color: cornflowerblue;
+}
 .content-left {
   border: 1px solid white;
   display: flex;
@@ -166,7 +238,6 @@
   font-size: 2rem;
 }
 
-
 .btn_submit {
   background: #6379f4;
   box-shadow: 0px 6px 75px rgba(100, 87, 87, 0.05);
@@ -182,19 +253,12 @@
   color: #ffffff;
 }
 
-
-
-
-
-
-
 @media only screen and (max-width: 768px) {
   .content_box {
     position: absolute;
     left: 150px;
   }
 }
-
 
 @media only screen and (max-width: 428px) {
   .content-left {
