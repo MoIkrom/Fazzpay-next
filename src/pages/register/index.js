@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+
 import axios from "axios";
 
 // import css
@@ -67,6 +68,7 @@ function Register() {
 
   // postRegister => register data user
   const postRegister = () => {
+    console.log("masuk");
     if (!email || !password || !lastname || !firstname)
       return setInput(false), setInputpending(false), setInput_(false), setInputpending_(false), setInput__(false), setInputpending__(false), setInputemail(false), setInputpendingemail(false), toast.error("Data cannot be empty");
     axios
