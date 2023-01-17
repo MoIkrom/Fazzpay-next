@@ -7,7 +7,7 @@ import css from "../../styles/TransferDetail.module.css";
 
 // import components
 import Header from "../../components/Header/Header";
-import Footer from "../../components/footer/Footer";
+import Footer from "../../components/Footer/Footer";
 import Sidebar from "../../components/sidebar/Sidebar";
 
 import CardProfileTransfer from "../../components/card_profile_transfer/ProfileTransfer";

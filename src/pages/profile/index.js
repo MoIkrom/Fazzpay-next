@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import css from "../../styles/Profile.module.css";
 
 import Header from "../../components/Header/Header";
-import Footer from "../../components/footer/Footer";
+import Footer from "../../components/Footer/Footer";
 import Sidebar from "../../components/sidebar/Sidebar";
 import image_profile from "../../assets/profile_transfer/profile_image.png";
 import { useRouter } from "next/router";
