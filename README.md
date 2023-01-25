@@ -41,10 +41,10 @@
 
 ### 1. Clone this repository
 
-Clone this repository by run the following code:
+Clone this repository :
 
 ```
-$ git clone https://github.com/MoIkrom/Fazzpay-next.git
+$ `https://github.com/MoIkrom/Fazzpay-next.git`
 ```
 
 ### 2. Install dependency packages
